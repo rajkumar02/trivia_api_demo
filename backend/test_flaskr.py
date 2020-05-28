@@ -86,6 +86,7 @@ class TriviaTestCase(unittest.TestCase):
             'difficulty': 1,
             'category': 1
         }
+
         ques_before = len(Question.query.all())
         get_all_res = self.client().post('/questions', json=add_ques_bank)
         get_data = json.loads(get_all_res.get_data)
@@ -107,7 +108,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(get_data["message"], "unprocessable")
 
     def test_questions_get_question_by_search(self):
-        insert_new_search = {'questionSearch': 'c'}
+        insert_new_search = {'searchTerm': 'c'}
         get_all_res = self.client().post('/questions/searchitem', json=insert_new_search)
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 200)
@@ -117,7 +118,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_404_question_by_search_all(self):
         insert_new_search = {
-            'questionSearch': '',
+            'searchTerm': '',
         }
         get_all_res = self.client().post('/questions/searchitem', json=insert_new_search)
         get_data = json.loads(get_all_res.get_data)
@@ -142,8 +143,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(get_data["message"], "Resource not found")
 
     def test_all_the_play_quizzes(self):
-        paly_quizzes = {'prev_ques': [],
-                          'get_quizzes_category': {'type': 'Science', 'id': 3}}
+        paly_quizzes = {'prev_ques': [],'get_quizzes_category': {'type': 'Science', 'id': 3}}
         get_all_res = self.client().post('/allquizz', json=paly_quizzes)
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 200)

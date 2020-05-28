@@ -37,11 +37,14 @@ class Question(db.Model):
     self.answer = answer
     self.category = category
     self.difficulty = difficulty
+
   def insert(self):
     db.session.add(self)
     db.session.commit()
+  
   def update(self):
     db.session.commit()
+
   def delete(self):
     db.session.delete(self)
     db.session.commit()
@@ -64,8 +67,10 @@ class Category(db.Model):
 
   id = Column(Integer, primary_key=True)
   type = Column(String)
+
   def __init__(self, type):
     self.type = type
+
   def format(self):
     return {
       'id': self.id,
