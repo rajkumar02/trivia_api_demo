@@ -2,10 +2,10 @@ from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 # import random
 import re
-from backend.database.models import setup_db, Question, Category
+from models import setup_db, Question, Category
 from sqlalchemy.sql.expression import func
 
-SHOW_QUES_PER_PAGE = 8
+SHOW_QUES_PER_PAGE = 10
 
 
 def create_app():
@@ -26,10 +26,9 @@ def create_app():
     def get_all_the_categories():
         # create get_cat dictionary for categories
         get_cat = {}
-        for categories in Category.query.all():
-            get_cat[categories.id] = categories.type
+        for category in Category.query.all():
+            get_cat[category.id] = category.type
         return jsonify({
-            'success': True,
             'categories': get_cat
         })
 
@@ -37,15 +36,15 @@ def create_app():
     def get_all_questions():
         # Get the all questions
         get_cat = {}
-        for categories in Category.query.all():
-            get_cat[categories.id] = categories.type
+        for category in Category.query.all():
+            get_cat[category.id] = category.type
         get_quest = [question.format() for question in Question.query.all()]
         get_page = int(request.args.get('page', '0'))
-        limit_up = get_page * 8
-        limit_low = limit_up - 8
+        limit_up = get_page * 10
+        limit_low = limit_up - 10
         return jsonify({
-            'success': True,
-            'questions': get_quest[limit_low:limit_up] if get_page else get_quest,
+            'questions': get_quest[
+                         limit_low:limit_up] if get_page else get_quest,
             'total_questions': len(get_quest),
             'categories': get_cat
         })
@@ -58,7 +57,6 @@ def create_app():
             return abort(404, f'Question not found and id: {qes_id}')
         get_quest.delete()
         return jsonify({
-            'success': True,
             'deleted': qes_id
         })
 
@@ -74,18 +72,16 @@ def create_app():
         quest_in = Question(question, answer, category, difficulty)
         quest_in.insert()
         return jsonify({
-            'success': True,
             'question': quest_in.format(),
         })
 
-    @app.route('/searchitem', methods=['POST'])
+    @app.route('/search', methods=['POST'])
     def get_search_all():
         # Search all the question using search terms
         get_search = request.json.get('searchTerm', '')
         get_quest = [question.format() for question in Question.query.all() if
                      re.search(get_search, question.question, re.IGNORECASE)]
         return jsonify({
-                'success': True,
                 'questions': get_quest,
                 'total_questions': len(get_quest)
             })
@@ -100,17 +96,16 @@ def create_app():
                      Question.query.filter(Question.category == cat_id)]
 
         return jsonify({
-            'success': True,
             'questions': get_quest,
             'total_questions': len(get_quest),
             'current_category': cat_id
         })
 
-    @app.route('/allquizz', methods=['POST'])
+    @app.route('/quizzes', methods=['POST'])
     def get_all_quizzes():
         # Get question for all quiz and return unique or none
-        prev_question = request.json.get('prev_ques')
-        get_cat = request.json.get('get_quizzes_category')
+        prev_question = request.json.get("previous_questions")
+        get_cat = request.json.get("quiz_category")
         if not get_cat:
             return abort(400, 'Key missing from body request')
         cat_id = int(get_cat.get('id'))
@@ -122,7 +117,6 @@ def create_app():
         if not all_quest:
             return jsonify({})
         return jsonify({
-            'success': True,
             'question': all_quest.format()
         })
 

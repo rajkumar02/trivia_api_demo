@@ -1,8 +1,8 @@
 import json
 import unittest
 from flask_sqlalchemy import SQLAlchemy
-from backend.database.models import setup_db
-from backend.flaskr import create_app
+from models import setup_db
+from flaskr import create_app
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -40,7 +40,6 @@ class TriviaTestCase(unittest.TestCase):
         get_all_res = self.client().get('/categories')
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 200)
-        self.assertEqual(get_data['success'], True)
         self.assertIsInstance(get_data['categories'], dict)
 
     # Testing get questions
@@ -48,7 +47,6 @@ class TriviaTestCase(unittest.TestCase):
         get_all_res = self.client().get('/questions?page=1')
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 200)
-        self.assertEqual(get_data['success'], True)
         self.assertIsInstance(get_data['questions'], list)
         self.assertLessEqual(len(get_data['questions']), 10)
         self.assertIsInstance(get_data['total_questions'], int)
@@ -113,8 +111,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIsInstance(get_data['questions'], list)
         self.assertIsInstance(get_data['total_questions'], int)
         self.assertEqual(get_data['current_category'], category_id)
-        for quest in get_data['questions']:
-            self.assertEqual(quest['category'], category_id)
+        for question in get_data['questions']:
+            self.assertEqual(question['category'], category_id)
 
     # If questions get fail
     def test_400_per_category_fail_questions(self):
@@ -123,31 +121,29 @@ class TriviaTestCase(unittest.TestCase):
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 400)
         self.assertEqual(get_data["success"], False)
-        self.assertEqual(get_data["message"], "Bad request")
 
     # Testing to get quiz questions
     def test_all_the_play_quizzes(self):
         paly_quizzes = {
-            'prev_ques': [1, 2, 3, 4],
-            'get_quizzes_category': {'type': 'Science', 'id': 1}
+            'previous_questions': [1, 2, 3, 4],
+            'quiz_category': {'id': 1, 'type': 'Science'}
         }
-        get_all_res = self.client().post('/allquizz', get_data=json.dumps(paly_quizzes),
+        get_all_res = self.client().post('/quizzes', get_data=json.dumps(paly_quizzes),
                                          content_type='application/json')
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 200)
         self.assertEqual(get_data['success'], True)
         if get_data.get('question', None):
             self.assertNotIn(get_data['question']['id'],
-                             paly_quizzes['prev_ques'])
+                             paly_quizzes['previous_questions'])
 
     # If quiz fail handle the error
     def test_400_play_quiz_fail(self):
-        get_all_res = self.client().post('/allquizz', get_data=json.dumps({}),
+        get_all_res = self.client().post('/quizzes', get_data=json.dumps({}),
                                          content_type='application/json')
         get_data = json.loads(get_all_res.get_data)
         self.assertEqual(get_all_res.status_code, 400)
         self.assertEqual(get_data["success"], False)
-        self.assertEqual(get_data["message"], "Bad request")
 
 
 # Make the tests conveniently executable
